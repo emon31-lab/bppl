@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#04120c">
+<title>Registration · Bepari Para Premier League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#04120c;--border:rgba(255,255,255,0.09);--border-hi:rgba(255,255,255,0.18);
+  --border-act:rgba(52,211,153,0.55);--accent:#10b981;--accent-lt:#34d399;
+  --gold:#fbbf24;--danger:#ff8a9b;
+  --text:#fff;--text-dim:rgba(255,255,255,0.7);--text-mute:rgba(255,255,255,0.42);
+  --r-md:16px;--r-sm:12px;
+  --ease:cubic-bezier(0.32,0.72,0,1);--ease-out:cubic-bezier(0.16,1,0.3,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+html,body{height:100%}
+body{font-family:'Hind Siliguri','Inter',system-ui,sans-serif;background:#000;color:var(--text);
+display:flex;justify-content:center;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased}
+.app{position:relative;width:100%;max-width:460px;min-height:100dvh;display:flex;flex-direction:column;
+background:radial-gradient(circle at 20% 0%,rgba(16,185,129,0.10),transparent 55%),
+radial-gradient(circle at 80% 100%,rgba(251,191,36,0.06),transparent 55%),
+linear-gradient(180deg,#061a12 0%,var(--bg) 50%,#030a07 100%);overflow:hidden}
+.icon{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;
+stroke-linecap:round;stroke-linejoin:round}
+.app-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
+padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));
+background:linear-gradient(180deg,rgba(4,18,12,0.98),rgba(4,18,12,0.88));
+backdrop-filter:blur(24px);z-index:30}
+.icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;
+background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+color:var(--text-dim);cursor:pointer;flex-shrink:0;text-decoration:none}
+.icon-btn:hover{background:rgba(255,255,255,0.09);color:#fff}
+.icon-btn:active{transform:scale(0.94)}
+.app-title{flex:1;text-align:center;display:flex;flex-direction:column;gap:1px;min-width:0}
+.app-title .t-main{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-title .t-sub{font-size:10px;font-weight:600;color:var(--accent-lt);letter-spacing:1.4px;text-transform:uppercase}
+.step-pill{padding:7px 12px;border-radius:100px;background:rgba(52,211,153,0.10);
+border:1px solid rgba(52,211,153,0.24);color:var(--accent-lt);font-size:11.5px;font-weight:700;
+letter-spacing:.3px;min-width:52px;text-align:center;flex-shrink:0}
+.step-pill.complete{background:linear-gradient(135deg,var(--accent),var(--accent-lt));
+color:#04120c;border-color:transparent;box-shadow:0 0 18px rgba(52,211,153,0.4)}
+.progress-track{flex-shrink:0;height:2px;background:rgba(255,255,255,0.05);overflow:hidden}
+.progress-fill{height:100%;width:33%;background:linear-gradient(90deg,var(--accent),var(--accent-lt),var(--gold));
+transition:width 0.6s var(--ease-out);box-shadow:0 0 12px rgba(52,211,153,0.4)}
+.screens{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.screens::-webkit-scrollbar{display:none}
+.screen{display:none;padding:24px 18px 20px;min-height:100%;animation-fill-mode:both}
+.screen.active{display:block}
+.screen.slide-right{animation:slideRight .42s var(--ease-out)}
+.screen.slide-left{animation:slideLeft .42s var(--ease-out)}
+@keyframes slideRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+.screen-head{margin-bottom:24px;animation:fadeUp .6s var(--ease-out) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:100px;
+background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.22);
+color:var(--accent-lt);font-size:10px;font-weight:700;letter-spacing:1.3px;
+text-transform:uppercase;margin-bottom:12px}
+.screen-head h1{font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-0.02em;margin-bottom:6px}
+.screen-head h1 .accent{background:linear-gradient(135deg,var(--accent-lt),var(--gold));
+-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.screen-head p{font-size:13.5px;color:var(--text-dim);line-height:1.5}
+.form-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;animation:fadeUp .6s var(--ease-out) both}
+.form-group label{font-size:10.5px;font-weight:700;color:var(--text-mute);
+text-transform:uppercase;letter-spacing:1px;padding-left:4px}
+.form-group input{width:100%;padding:14px 16px;border:1px solid var(--border);
+border-radius:var(--r-sm);font-family:inherit;font-size:15px;font-weight:500;color:#fff;
+background:rgba(255,255,255,0.025);outline:none;transition:all .3s var(--ease);letter-spacing:0.2px}
+.form-group input::placeholder{color:rgba(255,255,255,0.24);font-weight:400}
+.form-group input:focus{border-color:var(--border-act);background:rgba(255,255,255,0.05);
+box-shadow:0 0 0 4px rgba(52,211,153,0.10)}
+.form-group input.error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(255,138,155,0.12)}
+.field-error{font-size:11.5px;color:var(--danger);font-weight:500;padding-left:4px;
+max-height:0;opacity:0;overflow:hidden;transition:all .3s var(--ease)}
+.field-error.show{max-height:30px;opacity:1}
+/* Phone prefix */
+.phone-wrap{display:flex;align-items:center;background:rgba(255,255,255,0.025);
+border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;
+transition:all .3s var(--ease)}
+.phone-wrap:focus-within{border-color:var(--border-act);background:rgba(255,255,255,0.05);
+box-shadow:0 0 0 4px rgba(52,211,153,0.10)}
+.phone-wrap.error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(255,138,155,0.12)}
+.phone-prefix{padding:0 14px;height:50px;display:flex;align-items:center;
+font-size:15px;font-weight:700;color:var(--text-dim);
+border-right:1px solid var(--border);background:rgba(255,255,255,0.02);letter-spacing:0.5px}
+.phone-wrap input{border:none!important;background:transparent!important;box-shadow:none!important;
+padding:14px 16px!important;flex:1;width:auto!important}
+
+/* FIXED WHEEL PICKER */
+.wheel{position:relative;border-radius:var(--r-md);
+background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.04),transparent 70%),rgba(0,0,0,0.24);
+border:1px solid rgba(255,255,255,0.06);overflow:hidden;
+-webkit-user-select:none;user-select:none;contain:layout style paint}
+.wheel-scroll{height:100%;width:100%;overflow-y:scroll;overflow-x:hidden;
+scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;
+-webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 20%,black 80%,transparent 100%);
+mask-image:linear-gradient(to bottom,transparent 0%,black 20%,black 80%,transparent 100%);
+z-index: 2;
+}
+.wheel-scroll::-webkit-scrollbar{display:none;width:0;height:0}
+.wheel-list{position:relative}
+.wheel-item{display:flex;align-items:center;justify-content:center;text-align:center;height:36px;
+padding:0 8px;font-size:14px;font-weight:500;color:var(--text-mute);letter-spacing:.5px;
+scroll-snap-align:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+transform-origin:center center;will-change:transform,opacity;transition:color .22s var(--ease);
+backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.wheel-item.selected{color:#fff;font-weight:800;font-size:15px;text-shadow:0 0 16px rgba(52,211,153,0.6)}
+.wheel-band{position:absolute;top:50%;left:8px;right:8px;height:36px;transform:translateY(-50%);
+border-radius:10px;
+background:rgba(52,211,153,0.12);
+border:1px solid rgba(52,211,153,0.4);pointer-events:none;z-index:1;
+box-shadow:0 4px 15px -4px rgba(52,211,153,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.wheel-group{display:grid;grid-template-columns:1.15fr 0.85fr 0.85fr;gap:8px;margin-bottom:22px;
+animation:fadeUp .6s var(--ease-out) .1s both}
+.wheel-wrap{display:flex;flex-direction:column;gap:7px;min-width:0}
+.wheel-label{font-size:10.5px;font-weight:700;color:var(--text-mute);
+text-transform:uppercase;letter-spacing:1px;padding-left:4px}
+
+/* Bottom Bar */
+.bottom-bar{flex-shrink:0;padding:14px 16px;padding-bottom:calc(14px + env(safe-area-inset-bottom));
+background:linear-gradient(180deg,transparent 0%,rgba(3,10,7,0.85) 30%,#030a07 100%);
+backdrop-filter:blur(20px);z-index:40;transition:transform .4s var(--ease),opacity .3s var(--ease)}
+.bottom-bar.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+.cta{width:100%;padding:16px 20px;border:none;border-radius:var(--r-md);
+font-family:inherit;font-size:15px;font-weight:700;color:#04120c;
+background:linear-gradient(135deg,var(--accent-lt) 0%,var(--accent) 60%,var(--gold) 100%);
+box-shadow:0 14px 40px -8px rgba(52,211,153,0.55),inset 0 1px 0 rgba(255,255,255,0.5);
+cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+transition:transform .32s var(--ease),opacity .3s var(--ease)}
+.cta:active:not(:disabled){transform:scale(0.985)}
+.cta:disabled{opacity:0.35;cursor:not-allowed;filter:saturate(0.5)}
+.cta.loading .btn-text{display:none}
+.cta .btn-loader{display:none;align-items:center;gap:9px}
+.cta.loading .btn-loader{display:flex}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(4,18,12,0.25);
+border-top-color:#04120c;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Misc */
+.bkash-card{border-radius:var(--r-md);padding:20px;margin-bottom:20px;
+background:linear-gradient(145deg,rgba(226,0,116,0.15),rgba(226,0,116,0.05));
+border:1px solid rgba(226,0,116,0.4);animation:fadeUp .6s var(--ease-out) both}
+.bkash-logo{font-size:20px;font-weight:900;color:#e20074;letter-spacing:-.5px;margin-bottom:14px}
+.bkash-logo span{color:#fff;font-weight:600;font-size:13px;letter-spacing:0;margin-left:6px}
+.bkash-number-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+padding:14px 16px;background:rgba(0,0,0,0.35);border-radius:12px;
+border:1px solid rgba(255,255,255,0.08);margin-bottom:12px}
+.bkash-number{font-size:20px;font-weight:800;letter-spacing:.5px}
+.bkash-copy{padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:11px;font-weight:700;
+cursor:pointer;font-family:inherit;letter-spacing:.3px}
+.bkash-copy:active{transform:scale(0.95)}
+.bkash-amount{font-size:13px;text-align:center;margin-bottom:6px}
+.bkash-amount strong{font-size:18px;color:#fbbf24;font-weight:800}
+.bkash-note{font-size:11.5px;color:rgba(255,255,255,0.65);line-height:1.5;text-align:center}
+.bkash-note b{color:#fff}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+background:rgba(4,18,12,0.95);border:1px solid rgba(52,211,153,0.4);color:#fff;
+padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;
+opacity:0;pointer-events:none;transition:all .3s var(--ease);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:380px){
+  .screen-head h1{font-size:23px}
+  .wheel-group{grid-template-columns:1fr .8fr .8fr;gap:6px}
+  .wheel-item{font-size:13px}
+  .wheel-item.selected{font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="app-bar">
+  <a href="/" class="icon-btn" aria-label="Home">
+    <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </a>
+  <div class="app-title">
+    <span class="t-main" id="tName">Bepari Para Premier League</span>
+    <span class="t-sub">Player Registration</span>
+  </div>
+  <div class="step-pill" id="stepPill">1 / 3</div>
+</header>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="screens" id="screens">
+
+<!-- STEP 1 -->
+<section class="screen active" data-step="1">
+  <div class="screen-head">
+    <span class="eyebrow">Step 1</span>
+    <h1>Get <span class="accent">verified</span></h1>
+    <p>Enter your WhatsApp number and email. We'll send you a verification link.</p>
+  </div>
+
+  <div id="verifyForm">
+    <div class="form-group">
+      <label for="fWhatsapp">WhatsApp Number</label>
+      <div class="phone-wrap" id="phoneWrap">
+        <span class="phone-prefix">+880</span>
+        <input type="tel" id="fWhatsapp" inputmode="numeric" maxlength="10"
+               placeholder="1XXXXXXXXX" autocomplete="tel-national">
+      </div>
+      <span class="field-error" id="errWhatsapp"></span>
+    </div>
+    <div class="form-group">
+      <label for="fEmail">Email Address</label>
+      <input type="email" id="fEmail" autocomplete="email" placeholder="you@example.com">
+      <span class="field-error" id="errEmail"></span>
+    </div>
+  </div>
+
+  <div id="verifySent" class="verify-sent" style="display:none; padding:22px; border-radius:16px; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.28); text-align:center;">
+    <div style="width:60px; height:60px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,#34d399,#10b981); color:#04120c; box-shadow:0 12px 30px -8px rgba(52,211,153,0.5);">
+      <svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke-width:2.5;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:6px;">Check your email</h3>
+    <p style="font-size:13px; color:rgba(255,255,255,0.7); line-height:1.5; margin-bottom:10px;">We sent a verification link to<br><strong id="sentEmail" style="color:#34d399; word-break:break-all;">—</strong></p>
+  </div>
+</section>
+
+<!-- STEP 2: details (Photo section removed) -->
+<section class="screen" data-step="2">
+  <div class="screen-head">
+    <span class="eyebrow">Step 2</span>
+    <h1>Your <span class="accent">details</span></h1>
+    <p>Tell us about yourself.</p>
+  </div>
+
+  <div style="padding:12px 16px; border-radius:12px; background:rgba(52,211,153,0.10); border:1px solid rgba(52,211,153,0.28); display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+    <div style="width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,#34d399,#10b981); color:#04120c; display:grid; place-items:center;">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:3;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div style="flex:1; min-width:0; font-size:13px; color:rgba(255,255,255,0.7);">Email verified <strong id="vEmail2" style="color:#34d399; display:block; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">—</strong></div>
+  </div>
+
+  <div class="form-group">
+    <label for="fName">Full Name</label>
+    <input type="text" id="fName" autocomplete="name" placeholder="Your full name">
+    <span class="field-error" id="errName"></span>
+  </div>
+  <div class="form-group">
+    <label for="fFather">Father's Name</label>
+    <input type="text" id="fFather" autocomplete="off" placeholder="Father's name">
+    <span class="field-error" id="errFather"></span>
+  </div>
+  <div class="form-group">
+    <label for="fAddress">Address</label>
+    <input type="text" id="fAddress" autocomplete="street-address" placeholder="Area, City">
+    <span class="field-error" id="errAddress"></span>
+  </div>
+
+  <div class="wheel-group">
+    <div class="wheel-wrap">
+      <span class="wheel-label">Position</span>
+      <div class="wheel" id="positionWheel" role="listbox" tabindex="0"></div>
+    </div>
+    <div class="wheel-wrap">
+      <span class="wheel-label">Size</span>
+      <div class="wheel" id="sizeWheel" role="listbox" tabindex="0"></div>
+    </div>
+    <div class="wheel-wrap">
+      <span class="wheel-label">Number</span>
+      <div class="wheel" id="numberWheel" role="listbox" tabindex="0"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 3 -->
+<section class="screen" data-step="3">
+  <div class="screen-head">
+    <span class="eyebrow">Step 3</span>
+    <h1>Pay with <span class="accent">bKash</span></h1>
+    <p>Send the entry fee, then fill the details below.</p>
+  </div>
+
+  <div class="bkash-card">
+    <div class="bkash-logo">bKash <span>Send Money</span></div>
+    <div class="bkash-number-row">
+      <span class="bkash-number" id="bkashNum">—</span>
+      <button type="button" class="bkash-copy" id="copyBkash">COPY</button>
+    </div>
+    <div class="bkash-amount">Entry fee: <strong id="bkashAmt">৳—</strong></div>
+    <div class="bkash-note">Open bKash → <b>Send Money</b> → enter the number above → send the amount → copy the <b>TrxID</b> from the SMS.</div>
+  </div>
+
+  <div class="form-group">
+    <label for="fBkashNum">Your bKash Number</label>
+    <input type="tel" id="fBkashNum" inputmode="numeric" maxlength="11" placeholder="01XXXXXXXXX">
+    <span class="field-error" id="errBkashNum"></span>
+  </div>
+  <div class="form-group">
+    <label for="fTrxid">Transaction ID (TrxID)</label>
+    <input type="text" id="fTrxid" placeholder="e.g. 9F2K8LQ1MX" maxlength="20">
+    <span class="field-error" id="errTrxid"></span>
+  </div>
+  <div class="form-group">
+    <label for="fReferrer">Referrer Name</label>
+    <input type="text" id="fReferrer" placeholder="Who referred you?">
+    <span class="field-error" id="errReferrer"></span>
+  </div>
+</section>
+
+<!-- SUCCESS -->
+<section class="screen success-screen" data-step="4" style="padding:0; display:none; position:relative;">
+  <div style="text-align:center; padding:32px 24px; display:flex; flex-direction:column; align-items:center; gap:16px; animation:successIn .7s var(--spring) both; margin-top:80px;">
+    <div style="width:96px; height:96px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,#34d399,#10b981); color:#04120c; box-shadow:0 20px 50px -10px rgba(52,211,153,0.6); position:relative;">
+      <svg viewBox="0 0 24 24" style="width:44px;height:44px;stroke-width:3;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h1 style="font-size:28px; font-weight:800; letter-spacing:-0.025em; line-height:1.15; background:linear-gradient(135deg,#fff 0%,#a7f3d0 60%,#fcd34d 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Submitted!</h1>
+    <p id="successMsg" style="font-size:14px; color:rgba(255,255,255,0.7); line-height:1.55; max-width:320px;">Your registration has been submitted. Please check your email — we'll notify you once the admin approves.</p>
+    <p style="font-size:12px; color:rgba(255,255,255,0.42); margin-top:-6px;">You can close this page now.</p>
+  </div>
+</section>
+
+</div>
+
+<div class="bottom-bar" id="bottomBar">
+  <button type="button" class="cta" id="ctaBtn">
+    <span class="btn-text">Send verification email</span>
+    <span class="btn-loader"><span class="spinner"></span> Working...</span>
+  </button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+class WheelPicker {
+  constructor(container, options, cfg) {
+    cfg = cfg || {};
+    this.container = container;
+    this.options = options.map(o => typeof o === 'string' ? {value:o,label:o} : o);
+    this.itemHeight = cfg.itemHeight || 36;
+    this.visibleCount = cfg.visibleCount || 3;
+    this.onChange = cfg.onChange || function(){};
+    this.selectedIndex = 0;
+    this._rafId = null;
+    this._settleTimer = null;
+    this._lastFiredIndex = -1;
+    this._built = false;
+    this._pendingBuild = true;
+
+    const self = this;
+    requestAnimationFrame(() => { if (self._pendingBuild) self.build(); });
+  }
+
+  escape(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+  build() {
+    if (this._built) return;
+    this._built = true;
+    this._pendingBuild = false;
+
+    const self = this;
+    const h = this.itemHeight * this.visibleCount;
+    const pad = (h - this.itemHeight) / 2;
+
+    this.container.style.height = h + 'px';
+    this.container.innerHTML = `
+      <div class="wheel-scroll">
+        <div class="wheel-list" style="padding:${pad}px 0">
+          ${this.options.map((o,i) => `<div class="wheel-item" data-index="${i}">${this.escape(o.label)}</div>`).join('')}
+        </div>
+      </div>
+      <div class="wheel-band"></div>
+    `;
+
+    this.scrollEl = this.container.querySelector('.wheel-scroll');
+    this.listEl = this.container.querySelector('.wheel-list');
+    this.items = Array.from(this.listEl.children);
+    this.height = h;
+    this.pad = pad;
+
+    this.scrollEl.style.scrollSnapType = 'none';
+    this.scrollEl.scrollTop = this.selectedIndex * this.itemHeight;
+    this.items.forEach((it, i) => it.classList.toggle('selected', i === this.selectedIndex));
+
+    this.attach();
+
+    requestAnimationFrame(() => {
+      self.scrollEl.style.scrollSnapType = '';
+      self.updateVisuals();
+    });
+  }
+
+  attach() {
+    const self = this;
+    this.scrollEl.addEventListener('scroll', () => {
+      if (self._rafId === null) {
+        self._rafId = requestAnimationFrame(() => {
+          self.updateVisuals();
+          self._rafId = null;
+        });
+      }
+      clearTimeout(self._settleTimer);
+      self._settleTimer = setTimeout(() => self.settle(), 150);
+    }, { passive: true });
+
+    this.listEl.addEventListener('click', (e) => {
+      const item = e.target.closest('.wheel-item');
+      if (!item) return;
+      const idx = Number(item.dataset.index);
+      if (!isNaN(idx) && idx !== self.selectedIndex) self.select(idx, true);
+    });
+
+    this.container.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); self.select(Math.min(self.options.length - 1, self.selectedIndex + 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); self.select(Math.max(0, self.selectedIndex - 1)); }
+    });
+  }
+
+  updateVisuals() {
+    if (!this.scrollEl) return;
+    const scrollTop = this.scrollEl.scrollTop;
+    const center = scrollTop + this.height / 2;
+    const halfH = this.height / 2;
+
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      const itemCenter = this.pad + i * this.itemHeight + this.itemHeight / 2;
+      const delta = itemCenter - center;
+      const abs = Math.abs(delta);
+
+      if (abs > halfH + this.itemHeight) { item.style.visibility = 'hidden'; continue; }
+      item.style.visibility = 'visible';
+      
+      const ratio = delta / halfH;
+      const scale = Math.max(0.8, 1 - abs / halfH * 0.2);
+      const opacity = Math.max(0.2, 1 - abs / halfH * 0.8);
+      
+      item.style.transform = `translateZ(0) scale(${scale})`;
+      item.style.opacity = opacity;
+    }
+  }
+
+  settle() {
+    if (!this.scrollEl) return;
+    const scrollTop = this.scrollEl.scrollTop;
+    const idx = Math.round(scrollTop / this.itemHeight);
+    const clamped = Math.max(0, Math.min(this.options.length - 1, idx));
+    const target = clamped * this.itemHeight;
+
+    if (Math.abs(scrollTop - target) > 1) this.scrollEl.scrollTo({ top: target, behavior: 'smooth' });
+
+    this.items.forEach((it, i) => it.classList.toggle('selected', i === clamped));
+    this.selectedIndex = clamped;
+
+    if (clamped !== this._lastFiredIndex) {
+      this._lastFiredIndex = clamped;
+      if (navigator.vibrate) navigator.vibrate(8);
+      this.onChange(this.options[clamped] ? this.options[clamped].value : '', clamped);
+    }
+  }
+
+  select(index, smooth) {
+    if (smooth === undefined) smooth = true;
+    const i = Math.max(0, Math.min(this.options.length - 1, index));
+    this.selectedIndex = i;
+
+    if (!this.items) {
+      if (this._lastFiredIndex !== i) {
+        this._lastFiredIndex = i;
+        this.onChange(this.options[i] ? this.options[i].value : '', i);
+      }
+      return;
+    }
+
+    this.items.forEach((it, idx) => it.classList.toggle('selected', idx === i));
+
+    const target = i * this.itemHeight;
+    if (smooth) { this.scrollEl.scrollTo({ top: target, behavior: 'smooth' }); }
+    else {
+      this.scrollEl.style.scrollSnapType = 'none';
+      this.scrollEl.scrollTop = target;
+      const el = this.scrollEl;
+      requestAnimationFrame(() => { el.style.scrollSnapType = ''; this.updateVisuals(); });
+    }
+
+    if (this._lastFiredIndex !== i) {
+      this._lastFiredIndex = i;
+      this.onChange(this.options[i] ? this.options[i].value : '', i);
+    }
+  }
+
+  refresh() {
+    if (!this.scrollEl) return;
+    this.scrollEl.style.scrollSnapType = 'none';
+    this.scrollEl.scrollTop = this.selectedIndex * this.itemHeight;
+    requestAnimationFrame(() => { this.scrollEl.style.scrollSnapType = ''; this.updateVisuals(); });
+  }
+
+  getValue() { return this.options[this.selectedIndex] ? this.options[this.selectedIndex].value : ''; }
+}
+
+let CFG = { tournamentName:'Bepari Para Premier League', bkashNumber:'—', bkashAmount:0,
+  positions:['GK','CB','LB','RB','DMF','CMF','AMF','LW','RW','CF','ST'],
+  sizes:['S','M','L','XL','XXL'] };
+let session = { verified:false, email:'', whatsapp:'' };
+let positionWheel, sizeWheel, numberWheel;
+let state = {
+  step: 1, whatsapp:'', email:'', name:'', fatherName:'', address:'',
+  position:'', size:'', number:'10', bkashNumber:'', bkashTrxid:'', referrerName:''
+  // photoFile রিমুভ করা হয়েছে
+};
+let pollTimer = null;
+
+async function init() {
+  try { const r = await fetch('/api/config'); CFG = await r.json(); } catch {}
+  $('tName').textContent = CFG.tournamentName;
+  document.title = 'Registration · ' + CFG.tournamentName;
+  $('bkashNum').textContent = CFG.bkashNumber;
+  $('bkashAmt').textContent = '৳' + CFG.bkashAmount;
+
+  positionWheel = new WheelPicker($('positionWheel'),
+    [{value:'',label:'—'}].concat(CFG.positions.map(p => ({value:p,label:p}))),
+    { visibleCount:3, onChange: v => { state.position = v; updateCTA(); } });
+  sizeWheel = new WheelPicker($('sizeWheel'),
+    [{value:'',label:'—'}].concat(CFG.sizes.map(s => ({value:s,label:s}))),
+    { visibleCount:3, onChange: v => { state.size = v; updateCTA(); } });
+  const nums = [];
+  for (let i = 1; i <= 99; i++) nums.push({value:String(i),label:String(i)});
+  numberWheel = new WheelPicker($('numberWheel'), nums,
+    { visibleCount:3, onChange: v => { state.number = v; updateCTA(); } });
+  
+  numberWheel.select(9, false);
+  state.number = '10';
+
+  ['fWhatsapp','fEmail','fName','fFather','fAddress','fBkashNum','fTrxid','fReferrer']
+    .forEach(id => { const el = $(id); if (el) el.addEventListener('input', onInput); });
+
+  // Photo 관련 이벤트 리스너 제거됨
+
+  $('copyBkash').addEventListener('click', copyBkash);
+  $('ctaBtn').addEventListener('click', onCTA);
+
+  await checkSession();
+}
+
+async function checkSession() {
+  try {
+    const r = await fetch('/api/register/session');
+    const d = await r.json();
+    if (d.verified) {
+      session = { verified:true, email:d.email, whatsapp:d.whatsapp };
+      state.email = d.email; state.whatsapp = d.whatsapp.replace('+880','');
+      $('vEmail2').textContent = d.email;
+      goToStep(2, 'forward');
+    } else { session = { verified:false, email:'', whatsapp:'' }; goToStep(1); }
+  } catch { goToStep(1); }
+}
+
+function onInput(e) {
+  const id = e.target.id;
+  let val = e.target.value;
+  if (id === 'fWhatsapp') { val = val.replace(/\D/g,'').slice(0,10); e.target.value = val; }
+  if (id === 'fBkashNum') { val = val.replace(/\D/g,'').slice(0,11); e.target.value = val; }
+  const map = { fWhatsapp:'whatsapp', fEmail:'email', fName:'name', fFather:'fatherName',
+    fAddress:'address', fBkashNum:'bkashNumber', fTrxid:'bkashTrxid', fReferrer:'referrerName' };
+  if (map[id]) state[map[id]] = val;
+
+  const errMap = { fWhatsapp:'errWhatsapp', fEmail:'errEmail', fName:'errName', fFather:'errFather',
+    fAddress:'errAddress', fBkashNum:'errBkashNum', fTrxid:'errTrxid', fReferrer:'errReferrer' };
+  if (errMap[id]) {
+    $(errMap[id]).classList.remove('show'); e.target.classList.remove('error');
+    const pw = $('phoneWrap'); if (pw) pw.classList.remove('error');
+  }
+  updateCTA();
+}
+
+function copyBkash() { navigator.clipboard.writeText(CFG.bkashNumber).then(() => toast('bKash number copied!')).catch(() => toast(CFG.bkashNumber)); }
+
+function validateStep1() {
+  const errs = {};
+  if (!/^[0-9]{10}$/.test(state.whatsapp)) errs.whatsapp = 'Enter 10 digits (without +880)';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) errs.email = 'Enter a valid email';
+  return errs;
+}
+function validateStep2() {
+  const errs = {};
+  // if (!state.photoFile) errs.photo = 'Upload your photo'; <-- এই লাইনটি বাদ দেওয়া হয়েছে
+  if (!state.name.trim() || state.name.trim().length < 3) errs.name = 'Enter your full name';
+  if (!state.fatherName.trim()) errs.fatherName = "Enter father's name";
+  if (!state.address.trim()) errs.address = 'Enter your address';
+  if (!state.position) errs.position = 'Pick a position';
+  if (!state.size) errs.size = 'Pick a size';
+  if (!state.number) errs.number = 'Pick a number';
+  return errs;
+}
+function validateStep3() {
+  const errs = {};
+  if (!/^01[0-9]{9}$/.test(state.bkashNumber)) errs.bkashNumber = 'Enter your bKash number';
+  if (!state.bkashTrxid.trim() || state.bkashTrxid.trim().length < 6) errs.bkashTrxid = 'Enter TrxID';
+  if (!state.referrerName.trim()) errs.referrerName = 'Enter referrer name';
+  return errs;
+}
+function showErrors(errs) {
+  const map = { whatsapp:'errWhatsapp', email:'errEmail', name:'errName', fatherName:'errFather',
+    address:'errAddress', bkashNumber:'errBkashNum', bkashTrxid:'errTrxid',
+    referrerName:'errReferrer' }; // photo:'errPhoto' বাদ দেওয়া হয়েছে
+  const inpMap = { whatsapp:'fWhatsapp', email:'fEmail', name:'fName', fatherName:'fFather',
+    address:'fAddress', bkashNumber:'fBkashNum', bkashTrxid:'fTrxid', referrerName:'fReferrer' };
+  Object.keys(errs).forEach(k => {
+    const errId = map[k]; if (errId) { const el = $(errId); if (el) { el.textContent = errs[k]; el.classList.add('show'); } }
+    const inpId = inpMap[k]; if (inpId) { const inp = $(inpId); if (inp) inp.classList.add('error'); if (k === 'whatsapp' && $('phoneWrap')) $('phoneWrap').classList.add('error'); }
+  });
+}
+
+function updateCTA() {
+  let ok = false, text = 'Continue';
+  if (state.step === 1) { ok = Object.keys(validateStep1()).length === 0; text = 'Send verification email'; }
+  else if (state.step === 2) { ok = Object.keys(validateStep2()).length === 0; text = 'Continue'; }
+  else if (state.step === 3) { ok = Object.keys(validateStep3()).length === 0; text = 'Submit registration'; }
+  const btn = $('ctaBtn');
+  btn.disabled = !ok;
+  btn.querySelector('.btn-text').textContent = text;
+}
+
+function goToStep(n, dir) {
+  if (dir === undefined) dir = 'forward';
+  const cur = document.querySelector('.screen.active');
+  const tgt = document.querySelector(`.screen[data-step="${n}"]`);
+  if (!tgt) return;
+  if (cur) cur.classList.remove('active','slide-right','slide-left');
+  tgt.classList.add('active', dir === 'forward' ? 'slide-right' : 'slide-left');
+  $('screens').scrollTop = 0; state.step = n; updateUI();
+  if (n === 2) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (positionWheel) positionWheel.refresh();
+        if (sizeWheel) sizeWheel.refresh();
+        if (numberWheel) numberWheel.refresh();
+      });
+    });
+  }
+}
+function updateUI() {
+  const total = 3, pct = state.step <= total ? (state.step / total) * 100 : 100;
+  $('progressFill').style.width = pct + '%';
+  if (state.step <= total) { $('stepPill').textContent = state.step + ' / ' + total; $('stepPill').classList.remove('complete'); }
+  else { $('stepPill').textContent = '\u2713 Done'; $('stepPill').classList.add('complete'); }
+  $('bottomBar').classList.toggle('hidden', state.step === 4);
+  updateCTA();
+}
+
+let submitting = false;
+async function onCTA() {
+  if (submitting) return;
+  const btn = $('ctaBtn');
+
+  if (state.step === 1) {
+    const errs = validateStep1();
+    if (Object.keys(errs).length) { showErrors(errs); return; }
+    submitting = true; btn.classList.add('loading'); btn.disabled = true;
+    try {
+      const r = await fetch('/api/register/request-verification', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ whatsapp: state.whatsapp, email: state.email })
+      });
+      const d = await r.json();
+      if (!r.ok) { toast(d.error || 'Failed'); btn.disabled = false; return; }
+      $('sentEmail').textContent = state.email;
+      $('verifyForm').style.display = 'none'; $('verifySent').style.display = 'block'; btn.style.display = 'none';
+      startPolling();
+    } catch { toast('Network error'); btn.disabled = false; }
+    finally { submitting = false; btn.classList.remove('loading'); }
+
+  } else if (state.step === 2) {
+    const errs = validateStep2();
+    if (Object.keys(errs).length) { showErrors(errs); return; }
+    goToStep(3, 'forward');
+
+  } else if (state.step === 3) {
+    const errs = validateStep3();
+    if (Object.keys(errs).length) { showErrors(errs); return; }
+    submitting = true; btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+      const fd = new FormData();
+      fd.append('name', state.name);
+      fd.append('fatherName', state.fatherName);
+      fd.append('address', state.address);
+      fd.append('position', state.position);
+      fd.append('jerseySize', state.size);
+      fd.append('jerseyNumber', state.number);
+      fd.append('bkashNumber', state.bkashNumber);
+      fd.append('bkashTrxid', state.bkashTrxid);
+      fd.append('referrerName', state.referrerName);
+      // fd.append('photo', state.photoFile); <-- এই লাইনটি বাদ দেওয়া হয়েছে
+
+      const r = await fetch('/api/register/submit', { method:'POST', body: fd });
+      const d = await r.json();
+
+      if (!r.ok) {
+        if (d.errors) {
+          const step2Fields = ['name', 'fatherName', 'address', 'position', 'jerseySize', 'jerseyNumber'];
+          const step3Fields = ['bkashNumber', 'bkashTrxid', 'referrerName'];
+          
+          const hasStep2Errors = Object.keys(d.errors).some(k => step2Fields.includes(k));
+          const hasStep3Errors = Object.keys(d.errors).some(k => step3Fields.includes(k));
+
+          if (hasStep2Errors) {
+            goToStep(2, 'backward'); 
+            setTimeout(() => {
+              if (d.errors.position || d.errors.jerseySize || d.errors.jerseyNumber) {
+                toast(d.errors.position || d.errors.jerseySize || d.errors.jerseyNumber);
+              } else {
+                showErrors(d.errors);
+              }
+            }, 50);
+          } else if (hasStep3Errors) {
+            showErrors(d.errors);
+          } else { 
+            toast('Please check your input'); 
+          }
+        } else { 
+          toast(d.error || 'Failed'); 
+        }
+        btn.disabled = false; 
+        return;
+      }
+      if (navigator.vibrate) navigator.vibrate([50,40,100]);
+      $('successMsg').innerHTML = 'Your registration has been <strong>submitted</strong>. A confirmation email was sent to <strong>' + escapeHtml(state.email) + '</strong>. We\'ll notify you once the admin approves.';
+      goToStep(4, 'forward');
+    } catch (e) { console.error(e); toast('Network error'); btn.disabled = false; }
+    finally { submitting = false; btn.classList.remove('loading'); }
+  }
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async () => {
+    try {
+      const r = await fetch('/api/register/session');
+      const d = await r.json();
+      if (d.verified) {
+        clearInterval(pollTimer); pollTimer = null;
+        session = { verified:true, email:d.email, whatsapp:d.whatsapp };
+        state.email = d.email; state.whatsapp = d.whatsapp.replace('+880','');
+        $('vEmail2').textContent = d.email;
+        goToStep(2, 'forward');
+      }
+    } catch {}
+  }, 3000);
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let toastTimer;
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+init();
+</script>
+</body>
+</html>

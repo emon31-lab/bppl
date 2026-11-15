@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04120c">
+<title>Admin · Bepari Para Premier League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --border:rgba(255,255,255,0.09);--border-hi:rgba(255,255,255,0.18);
+  --accent:#10b981;--accent-lt:#34d399;--gold:#fbbf24;--danger:#ff8a9b;
+  --text:#fff;--text-dim:rgba(255,255,255,0.7);--text-mute:rgba(255,255,255,0.42);
+}
+html,body{height:100%}
+body{font-family:'Hind Siliguri','Inter',system-ui,sans-serif;background:#000;color:var(--text);
+-webkit-font-smoothing:antialiased;min-height:100dvh;display:flex;flex-direction:column}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100dvh;display:grid;place-items:center;padding:24px;
+background:radial-gradient(circle at 30% 20%,rgba(16,185,129,0.15),transparent 55%),
+radial-gradient(circle at 70% 80%,rgba(251,191,36,0.08),transparent 55%),#04120c}
+.login-card{width:100%;max-width:380px;padding:32px 26px;border-radius:22px;
+background:rgba(255,255,255,0.045);border:1px solid var(--border);box-shadow:0 20px 60px -20px rgba(0,0,0,0.5)}
+.login-logo{width:70px;height:70px;margin:0 auto 20px;display:grid;place-items:center}
+.login-logo img{max-width:100%;max-height:100%;object-fit:contain}
+.login-card h1{font-size:22px;font-weight:800;margin-bottom:4px;text-align:center}
+.login-card p{font-size:13px;color:var(--text-dim);margin-bottom:24px;text-align:center}
+.login-card label{display:block;font-size:10.5px;font-weight:700;color:var(--text-mute);
+text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;padding-left:4px}
+.login-card input{width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:12px;
+background:rgba(255,255,255,0.025);color:#fff;font-family:inherit;font-size:14.5px;outline:none;
+transition:all .25s ease;margin-bottom:16px}
+.login-card input:focus{border-color:rgba(52,211,153,0.55);box-shadow:0 0 0 4px rgba(52,211,153,0.10)}
+.login-card button{width:100%;padding:14px;border:none;border-radius:12px;font-family:inherit;
+font-size:14.5px;font-weight:700;color:#04120c;
+background:linear-gradient(135deg,#34d399,#10b981,#fbbf24);cursor:pointer;
+box-shadow:0 14px 32px -8px rgba(52,211,153,0.55);transition:transform 0.2s}
+.login-card button:active{transform:scale(0.98)}
+.login-card .err{color:var(--danger);font-size:12px;margin-bottom:12px;padding:8px 12px;
+border-radius:8px;background:rgba(255,138,155,0.1);border:1px solid rgba(255,138,155,0.3);display:none}
+.login-card .err.show{display:block}
+.login-back{display:block;text-align:center;margin-top:20px;font-size:12px;color:var(--text-mute);text-decoration:none}
+.login-back:hover{color:#fff}
+
+/* ===== DASHBOARD ===== */
+.dash{display:none;min-height:100dvh;background:radial-gradient(circle at 15% 0%,rgba(16,185,129,0.10),transparent 55%),#04120c}
+.dash.active{display:block}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;
+background:rgba(4,18,12,0.95);border-bottom:1px solid var(--border);position:sticky;top:0;
+z-index:10;backdrop-filter:blur(20px)}
+.topbar .logo{width:38px;height:38px;flex-shrink:0;margin-right:12px}
+.topbar .logo img{max-width:100%;max-height:100%;object-fit:contain}
+.topbar .info{flex:1;min-width:0}
+.topbar h1{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar .sub{font-size:10px;color:var(--accent-lt);letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
+.topbar-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+
+.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.05);
+color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.2px;
+transition:all 0.2s; white-space:nowrap;}
+.btn:hover{background:rgba(255,255,255,0.1);border-color:var(--border-hi)}
+.btn:active{transform:scale(0.97)}
+.btn-accent{background:linear-gradient(135deg,var(--accent-lt),var(--accent));color:#04120c;border-color:transparent}
+.btn-accent:hover{background:linear-gradient(135deg,var(--accent-lt),var(--accent));opacity:0.9}
+.btn-danger{color:var(--danger);border-color:rgba(255,138,155,0.3)}
+.btn-danger:hover{background:rgba(255,138,155,0.1)}
+
+.container{max-width:1500px;margin:0 auto;padding:24px 22px 60px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.stat{padding:16px 18px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid var(--border)}
+.stat .num{font-size:26px;font-weight:800;letter-spacing:-0.02em;
+background:linear-gradient(135deg,#fff,#a7f3d0);-webkit-background-clip:text;background-clip:text;
+-webkit-text-fill-color:transparent}
+.stat .lbl{font-size:10.5px;color:var(--text-mute);text-transform:uppercase;letter-spacing:1.1px;font-weight:700;margin-top:2px}
+.stat.gold .num{background:linear-gradient(135deg,#fff,#fcd34d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat.pink .num{background:linear-gradient(135deg,#fff,#f9a8d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.toolbar input,.toolbar select{padding:10px 14px;border-radius:10px;border:1px solid var(--border);
+background:rgba(255,255,255,0.04);color:#fff;font-family:inherit;font-size:13px;outline:none;min-width:150px}
+.toolbar input:focus,.toolbar select:focus{border-color:rgba(52,211,153,0.55)}
+.toolbar .grow{flex:1;min-width:200px}
+
+/* Table */
+.tbl-wrap{border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:1300px}
+thead{background:rgba(255,255,255,0.04)}
+th{text-align:left;padding:13px 14px;font-size:10.5px;font-weight:700;color:var(--text-mute);
+text-transform:uppercase;letter-spacing:1px;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
+td .pname{font-weight:700;color:#fff}
+td .pemail{font-size:11px;color:var(--text-mute);margin-top:2px}
+
+.badge{display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:700;letter-spacing:0.3px}
+.badge.pending{background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:var(--gold)}
+.badge.approved{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:var(--accent-lt)}
+.badge.rejected{background:rgba(255,138,155,0.15);border:1px solid rgba(255,138,155,0.4);color:var(--danger)}
+
+.cat-sel{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.05);
+color:#fff;font-family:inherit;font-size:12px;font-weight:600;outline:none;cursor:pointer}
+.cat-sel:focus{border-color:var(--accent-lt)}
+
+.mini{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);
+color:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s}
+.mini:hover{background:rgba(255,255,255,0.09)}
+.mini.approve{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.4);color:var(--accent-lt)}
+.mini.approve:hover{background:rgba(52,211,153,0.25)}
+.mini.reject{background:rgba(255,138,155,0.10);border-color:rgba(255,138,155,0.3);color:var(--danger)}
+.mini.reject:hover{background:rgba(255,138,155,0.2)}
+.mini.edit{background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.4);color:#7dd3fc}
+.mini.edit:hover{background:rgba(56,189,248,0.25)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.empty{padding:60px 20px;text-align:center;color:var(--text-mute);font-size:14px}
+
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;z-index:99999;
+padding:20px;overflow-y:auto;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:block}
+.modal-content{max-width:500px;margin:40px auto;background:#04120c;border-radius:20px;
+border:1px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,0.5);overflow:hidden;animation:modalIn 0.3s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:18px 22px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:space-between;gap:12px}
+.modal-header h2{font-size:16px;font-weight:800}
+.modal-close{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);
+background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;font-size:20px;line-height:1;
+display:grid;place-items:center;transition:all 0.2s}
+.modal-close:hover{background:rgba(255,255,255,0.1);color:var(--danger)}
+.modal-body{padding:22px}
+.modal-footer{padding:16px 22px;background:rgba(255,255,255,0.03);border-top:1px solid var(--border);
+display:flex;gap:10px;justify-content:flex-end}
+
+/* Form Fields */
+.form-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-field label{font-size:10.5px;font-weight:700;color:var(--text-mute);text-transform:uppercase;letter-spacing:1px}
+.form-field input,.form-field select{width:100%;padding:11px 13px;border:1px solid var(--border);
+border-radius:10px;background:rgba(255,255,255,0.04);color:#fff;font-family:inherit;font-size:13.5px;outline:none;transition:all .2s}
+.form-field input:focus,.form-field select:focus{border-color:rgba(52,211,153,0.55);box-shadow:0 0 0 3px rgba(52,211,153,0.1)}
+.form-field input.err{border-color:var(--danger);box-shadow:0 0 0 3px rgba(255,138,155,0.1)}
+.err-msg{font-size:11px;color:var(--danger);padding-left:2px;display:none}
+.err-msg.show{display:block}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+background:rgba(4,18,12,0.98);border:1px solid rgba(52,211,153,0.4);color:#fff;
+padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;
+opacity:0;pointer-events:none;transition:all 0.3s ease;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Print */
+@media print {
+  body{background:#fff;color:#000}
+  .topbar,.toolbar,.no-print,.stats,.toast,.modal-overlay{display:none!important}
+  .dash{background:#fff}
+  .container{padding:0;max-width:none}
+  .tbl-wrap{border:none;background:#fff;border-radius:0;overflow:visible}
+  table{min-width:0;font-size:10px}
+  th,td{color:#000;border-color:#ddd;padding:6px 8px}
+  thead{background:#eee}
+  .badge{border:1px solid #999;background:#eee;color:#000}
+  .cat-sel,.mini,.actions{display:none!important}
+  .print-title{display:block!important;font-size:18px;font-weight:800;
+    margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #000}
+}
+.print-title{display:none}
+
+/* Mobile */
+@media (max-width:768px){
+  .topbar{padding:10px 14px;gap:10px;flex-wrap:wrap}
+  .topbar .logo{width:32px;height:32px;margin-right:8px}
+  .topbar h1{font-size:13px}
+  .topbar-actions{width:100%;justify-content:space-between;margin-top:8px}
+  .btn{padding:7px 10px;font-size:11px;flex:1;text-align:center}
+  .container{padding:16px 14px 40px}
+  .modal-overlay{padding:10px}
+  .modal-content{margin:10px auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="loginWrap">
+  <div style="width:100%">
+    <form class="login-card" id="loginForm">
+      <div class="login-logo">
+        <img src="/logo.webp" alt="Logo" onerror="this.style.display='none'">
+      </div>
+      <h1>Admin Login</h1>
+      <p>Sign in to manage registrations.</p>
+      <div class="err" id="loginErr"></div>
+      <label for="u">Username</label>
+      <input type="text" id="u" autocomplete="username" required>
+      <label for="p">Password</label>
+      <input type="password" id="p" autocomplete="current-password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <a href="/" class="login-back">← Back to home</a>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dash" id="dash">
+  <div class="topbar">
+    <div style="display:flex;align-items:center">
+      <div class="logo">
+        <img src="/logo.webp" alt="Logo" onerror="this.style.display='none'">
+      </div>
+      <div class="info">
+        <h1 id="tournName">Bepari Para Premier League</h1>
+        <div class="sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="settingsBtn">⚙ Settings</button>
+      <button class="btn" id="printBtn">🖨 Print</button>
+      <button class="btn" id="csvBtn">⬇ CSV</button>
+      <button class="btn btn-danger" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat"><div class="num" id="sTotal">0</div><div class="lbl">Total</div></div>
+      <div class="stat gold"><div class="num" id="sPending">0</div><div class="lbl">Pending</div></div>
+      <div class="stat"><div class="num" id="sApproved">0</div><div class="lbl">Approved</div></div>
+      <div class="stat pink"><div class="num" id="sRejected">0</div><div class="lbl">Rejected</div></div>
+    </div>
+
+    <div class="toolbar no-print">
+      <input class="grow" type="search" id="search" placeholder="Search name, email, mobile, TrxID…">
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved (Merit list)</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select id="filterCat"><option value="">All categories</option></select>
+      <button class="btn btn-accent" id="refreshBtn">Refresh</button>
+    </div>
+
+    <h2 class="print-title" id="printTitle">Player Merit List</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>WhatsApp</th>
+            <th>Position</th>
+            <th>Jersey</th>
+            <th>bKash / TrxID</th>
+            <th>Referrer</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th class="no-print">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="emptyMsg" style="display:none">No players yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Tournament Settings</h2>
+      <button class="modal-close" onclick="closeSettings()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>bKash Number (Send Money)</label>
+        <input type="tel" id="setBkashNumber" maxlength="11" placeholder="01XXXXXXXXX">
+        <div class="err-msg" id="errSetBkash"></div>
+      </div>
+      <div class="form-field">
+        <label>Entry Fee (৳)</label>
+        <input type="number" id="setBkashAmount" placeholder="200">
+        <div class="err-msg" id="errSetAmount"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-accent" id="saveSettingsBtn">💾 Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT PLAYER MODAL ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit Player</h2>
+      <button class="modal-close" onclick="closeEdit()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-field">
+        <label>Name</label>
+        <input type="text" id="editName" data-field="name">
+        <div class="err-msg" data-err="name"></div>
+      </div>
+      <div class="form-field">
+        <label>Father's Name</label>
+        <input type="text" id="editFather" data-field="fatherName">
+        <div class="err-msg" data-err="fatherName"></div>
+      </div>
+      <div class="form-field">
+        <label>Mobile</label>
+        <input type="tel" id="editMobile" data-field="mobile" maxlength="11">
+        <div class="err-msg" data-err="mobile"></div>
+      </div>
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" id="editEmail" data-field="email">
+        <div class="err-msg" data-err="email"></div>
+      </div>
+      <div class="form-field">
+        <label>Address</label>
+        <input type="text" id="editAddress" data-field="address">
+        <div class="err-msg" data-err="address"></div>
+      </div>
+      <div class="form-field">
+        <label>Position</label>
+        <select id="editPosition" data-field="position"></select>
+        <div class="err-msg" data-err="position"></div>
+      </div>
+      <div class="form-field">
+        <label>Jersey Size</label>
+        <select id="editSize" data-field="jerseySize"></select>
+        <div class="err-msg" data-err="jerseySize"></div>
+      </div>
+      <div class="form-field">
+        <label>Jersey Number</label>
+        <input type="text" id="editNumber" data-field="jerseyNumber" maxlength="2">
+        <div class="err-msg" data-err="jerseyNumber"></div>
+      </div>
+      <div class="form-field">
+        <label>Referrer</label>
+        <input type="text" id="editReferrer" data-field="referrerName">
+      </div>
+      <div class="form-field">
+        <label>bKash Number</label>
+        <input type="tel" id="editBkash" data-field="bkashNumber" maxlength="11">
+        <div class="err-msg" data-err="bkashNumber"></div>
+      </div>
+      <div class="form-field">
+        <label>TrxID</label>
+        <input type="text" id="editTrxid" data-field="bkashTrxid" maxlength="20">
+        <div class="err-msg" data-err="bkashTrxid"></div>
+      </div>
+      <div class="form-field">
+        <label>Category</label>
+        <select id="editCategory" data-field="category"></select>
+      </div>
+      <div class="form-field">
+        <label>Status</label>
+        <select id="editStatus" data-field="status">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEdit()">Cancel</button>
+      <button class="btn btn-accent" id="saveEditBtn">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+let ALL = [];
+let CATEGORIES = [];
+let POSITIONS = [];
+let SIZES = [];
+let TOURNAMENT = 'Bepari Para Premier League';
+
+// ================= API HELPER =================
+async function api(url, opts) {
+  opts = opts || {};
+  try {
+    const res = await fetch(url, Object.assign({ 
+      credentials: 'include',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {}) 
+    }, opts));
+    const data = await res.json().catch(() => ({}));
+    
+    // Session Expired Handler
+    if (res.status === 401 && !url.includes('login')) {
+      toast('Session expired. Please login again.');
+      setTimeout(() => location.reload(), 1500);
+      return { res, data };
+    }
+    
+    return { res, data };
+  } catch (err) {
+    return { res: { ok: false }, data: { error: 'Network error. Check connection.' } };
+  }
+}
+
+// ================= LOGIN =================
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('loginErr'); 
+  err.classList.remove('show');
+  
+  const btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+
+  const r = await api('/api/admin/login', {
+    method: 'POST', 
+    body: JSON.stringify({ username: $('u').value, password: $('p').value })
+  });
+  
+  if (!r.res.ok) { 
+    err.textContent = r.data.error || 'Login failed'; 
+    err.classList.add('show'); 
+    btn.disabled = false; btn.textContent = 'Sign in';
+    return; 
+  }
+  boot();
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  await api('/api/admin/logout', { method: 'POST' });
+  location.reload();
+});
+
+// ================= BOOT =================
+async function boot() {
+  const [meRes, cfgRes] = await Promise.all([
+    api('/api/admin/me'),
+    fetch('/api/config').then(r => r.json()).catch(() => ({}))
+  ]);
+  
+  if (!meRes.res.ok) { 
+    $('loginWrap').style.display = 'grid'; 
+    $('dash').classList.remove('active'); 
+    return; 
+  }
+  
+  TOURNAMENT = meRes.data.tournamentName || TOURNAMENT;
+  $('tournName').textContent = TOURNAMENT;
+  $('printTitle').textContent = TOURNAMENT + ' — Player Merit List';
+  
+  POSITIONS = cfgRes.positions || [];
+  SIZES = cfgRes.sizes || [];
+  
+  $('loginWrap').style.display = 'none';
+  $('dash').classList.add('active');
+  
+  await loadPlayers();
+}
+
+// ================= LOAD DATA =================
+async function loadPlayers() {
+  const r = await api('/api/admin/players');
+  if (!r.res.ok) return; // 401 handled in api()
+  
+  ALL = r.data.players || [];
+  CATEGORIES = r.data.categories || [];
+  
+  renderCategoryFilter();
+  renderStats();
+  renderTable();
+}
+
+function renderCategoryFilter() {
+  const sel = $('filterCat');
+  sel.innerHTML = '<option value="">All categories</option>';
+  CATEGORIES.forEach(c => {
+    if (!c) return;
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function renderStats() {
+  $('sTotal').textContent = ALL.length;
+  $('sPending').textContent = ALL.filter(p => p.status === 'pending').length;
+  $('sApproved').textContent = ALL.filter(p => p.status === 'approved').length;
+  $('sRejected').textContent = ALL.filter(p => p.status === 'rejected').length;
+}
+
+function renderTable() {
+  const q = $('search').value.trim().toLowerCase();
+  const fStat = $('filterStatus').value;
+  const fCat = $('filterCat').value;
+
+  const rows = ALL.filter(p => {
+    if (fStat && p.status !== fStat) return false;
+    if (fCat && p.category !== fCat) return false;
+    if (q) {
+      const hay = [p.name, p.email, p.mobile, p.bkashTrxid, p.bkashNumber, p.referrerName].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  const tbody = $('tbody');
+  tbody.innerHTML = '';
+  
+  if (rows.length === 0) { 
+    $('emptyMsg').style.display = 'block'; 
+    return; 
+  }
+  $('emptyMsg').style.display = 'none';
+
+  rows.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    const catOpts = [''].concat(CATEGORIES.filter(c=>c)).map(c =>
+      `<option value="${esc(c)}" ${p.category===c?'selected':''}>${c ? esc(c) : '—'}</option>`
+    ).join('');
+    
+    const statusLabel = p.status === 'approved' ? '✓ Approved' : (p.status === 'rejected' ? '✗ Rejected' : '⏳ Pending');
+    const statusBtns = p.status === 'pending'
+      ? `<button class="mini approve" data-action="approve" data-id="${p._id}">✓ Approve</button>
+         <button class="mini reject" data-action="reject" data-id="${p._id}">✗ Reject</button>`
+      : `<button class="mini" data-action="pending" data-id="${p._id}">↺ Reset</button>`;
+
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>
+        <div class="pname">${esc(p.name)}</div>
+        <div class="pemail">${esc(p.email)}</div>
+      </td>
+      <td>${esc(p.mobile)}</td>
+      <td><strong>${esc(p.position)}</strong></td>
+      <td>${esc(p.jerseySize)} · #${esc(p.jerseyNumber)}</td>
+      <td>
+        <div style="font-size:12px">${esc(p.bkashNumber)}</div>
+        <div style="font-size:11px;color:var(--text-mute)">TrxID: ${esc(p.bkashTrxid)}</div>
+      </td>
+      <td>${esc(p.referrerName || '—')}</td>
+      <td><select class="cat-sel" data-id="${p._id}">${catOpts}</select></td>
+      <td><span class="badge ${p.status}">${statusLabel}</span></td>
+      <td style="font-size:11px;color:var(--text-mute);white-space:nowrap">${fmtDate(p.createdAt)}</td>
+      <td class="no-print">
+        <div class="actions">
+          ${statusBtns}
+          <button class="mini edit" data-action="edit" data-id="${p._id}">✎ Edit</button>
+          <button class="mini reject" data-action="delete" data-id="${p._id}">🗑</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Category Change
+  tbody.querySelectorAll('.cat-sel').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const r = await api('/api/admin/players/' + sel.dataset.id, {
+        method: 'PATCH', body: JSON.stringify({ category: sel.value })
+      });
+      if (r.res.ok) {
+        const idx = ALL.findIndex(x => x._id === sel.dataset.id);
+        if (idx >= 0) ALL[idx] = r.data.player;
+        toast('Category updated');
+      } else {
+        toast('Update failed');
+        renderTable(); // revert UI
+      }
+    });
+  });
+
+  // Action Buttons
+  tbody.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+
+      if (action === 'edit') {
+        const player = ALL.find(x => x._id === id);
+        if (player) openEdit(player);
+        return;
+      }
+      
+      if (action === 'delete') {
+        if (!confirm('Delete this player permanently?')) return;
+        const r = await api('/api/admin/players/' + id, { method:'DELETE' });
+        if (r.res.ok) {
+          ALL = ALL.filter(x => x._id !== id);
+          renderStats(); renderTable();
+          toast('Player deleted');
+        } else toast('Delete failed');
+        return;
+      }
+
+      let newStatus = '';
+      if (action === 'approve') {
+        if (!confirm('Approve this player? A confirmation email will be sent.')) return;
+        newStatus = 'approved';
+      } else if (action === 'reject') {
+        if (!confirm('Reject this player?')) return;
+        newStatus = 'rejected';
+      } else if (action === 'pending') {
+        newStatus = 'pending';
+      }
+
+      const r = await api('/api/admin/players/' + id, {
+        method: 'PATCH', body: JSON.stringify({ status: newStatus })
+      });
+      if (r.res.ok) {
+        const idx = ALL.findIndex(x => x._id === id);
+        if (idx >= 0) ALL[idx] = r.data.player;
+        renderStats(); renderTable();
+        toast(newStatus === 'approved' ? 'Approved — email sent' : 'Status updated');
+      } else toast('Update failed');
+    });
+  });
+}
+
+// ================= SETTINGS MODAL =================
+$('settingsBtn').addEventListener('click', async () => {
+  $('settingsModal').classList.add('show');
+  $('errSetBkash').classList.remove('show');
+  $('errSetAmount').classList.remove('show');
+  
+  const r = await api('/api/admin/settings');
+  if (r.res.ok && r.data.settings) {
+    $('setBkashNumber').value = r.data.settings.bkashNumber;
+    $('setBkashAmount').value = r.data.settings.bkashAmount;
+  }
+});
+
+function closeSettings() { 
+  $('settingsModal').classList.remove('show'); 
+}
+window.closeSettings = closeSettings;
+
+$('saveSettingsBtn').addEventListener('click', async () => {
+  const btn = $('saveSettingsBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  
+  const bkashNumber = $('setBkashNumber').value.trim();
+  const bkashAmount = $('setBkashAmount').value.trim();
+  
+  $('errSetBkash').classList.remove('show');
+  $('errSetAmount').classList.remove('show');
+  $('setBkashNumber').classList.remove('err');
+  $('setBkashAmount').classList.remove('err');
+  
+  const r = await api('/api/admin/settings', {
+    method:'POST', body: JSON.stringify({ bkashNumber, bkashAmount })
+  });
+  
+  if (!r.res.ok) {
+    if (r.data.error && r.data.error.includes('bKash')) {
+      $('errSetBkash').textContent = r.data.error; 
+      $('errSetBkash').classList.add('show');
+      $('setBkashNumber').classList.add('err');
+    } else if (r.data.error && r.data.error.includes('amount')) {
+      $('errSetAmount').textContent = r.data.error; 
+      $('errSetAmount').classList.add('show');
+      $('setBkashAmount').classList.add('err');
+    } else {
+      toast(r.data.error || 'Failed');
+    }
+  } else {
+    toast('✓ Settings saved successfully!');
+    closeSettings();
+  }
+  
+  btn.disabled = false; btn.textContent = '💾 Save Settings';
+});
+
+// ================= EDIT MODAL =================
+function openEdit(p) {
+  $('editId').value = p._id;
+  $('editName').value = p.name || '';
+  $('editFather').value = p.fatherName || '';
+  $('editMobile').value = p.mobile || '';
+  $('editEmail').value = p.email || '';
+  $('editAddress').value = p.address || '';
+  $('editNumber').value = p.jerseyNumber || '';
+  $('editReferrer').value = p.referrerName || '';
+  $('editBkash').value = p.bkashNumber || '';
+  $('editTrxid').value = p.bkashTrxid || '';
+
+  $('editPosition').innerHTML = POSITIONS.map(pos => `<option value="${esc(pos)}" ${p.position===pos?'selected':''}>${esc(pos)}</option>`).join('');
+  $('editSize').innerHTML = SIZES.map(s => `<option value="${esc(s)}" ${p.jerseySize===s?'selected':''}>${esc(s)}</option>`).join('');
+  $('editCategory').innerHTML = [''].concat(CATEGORIES.filter(c=>c)).map(c => `<option value="${esc(c)}" ${p.category===c?'selected':''}>${c ? esc(c) : '—'}</option>`).join('');
+  $('editStatus').value = p.status || 'pending';
+
+  document.querySelectorAll('#editModal .err-msg').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('#editModal input').forEach(el => el.classList.remove('err'));
+
+  $('editModal').classList.add('show');
+}
+
+function closeEdit() { 
+  $('editModal').classList.remove('show'); 
+}
+window.closeEdit = closeEdit;
+
+$('saveEditBtn').addEventListener('click', async () => {
+  const id = $('editId').value;
+  const btn = $('saveEditBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  document.querySelectorAll('#editModal .err-msg').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('#editModal input').forEach(el => el.classList.remove('err'));
+
+  const fd = new FormData();
+  fd.append('name', $('editName').value);
+  fd.append('fatherName', $('editFather').value);
+  fd.append('mobile', $('editMobile').value);
+  fd.append('email', $('editEmail').value);
+  fd.append('address', $('editAddress').value);
+  fd.append('position', $('editPosition').value);
+  fd.append('jerseySize', $('editSize').value);
+  fd.append('jerseyNumber', $('editNumber').value);
+  fd.append('referrerName', $('editReferrer').value);
+  fd.append('bkashNumber', $('editBkash').value);
+  fd.append('bkashTrxid', $('editTrxid').value);
+  fd.append('category', $('editCategory').value);
+  fd.append('status', $('editStatus').value);
+
+  try {
+    const res = await fetch('/api/admin/players/' + id + '/edit', {
+      method: 'PATCH', body: fd, credentials: 'include'
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (data.errors) {
+        Object.keys(data.errors).forEach(k => {
+          const errEl = document.querySelector(`#editModal .err-msg[data-err="${k}"]`);
+          if (errEl) { errEl.textContent = data.errors[k]; errEl.classList.add('show'); }
+          const inputEl = document.querySelector(`#editModal [data-field="${k}"]`);
+          if (inputEl) inputEl.classList.add('err');
+        });
+        toast('Please fix the errors');
+      } else {
+        toast(data.error || 'Failed to save');
+      }
+      btn.disabled = false; btn.textContent = '💾 Save Changes';
+      return;
+    }
+
+    const idx = ALL.findIndex(x => x._id === id);
+    if (idx >= 0) ALL[idx] = data.player;
+    renderStats(); 
+    renderTable();
+    closeEdit();
+    toast('✓ Player updated successfully');
+  } catch (e) {
+    toast('Network error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Save Changes';
+  }
+});
+
+// ================= HELPERS =================
+function esc(s) { 
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); 
+}
+function fmtDate(s) { 
+  if (!s) return '—'; 
+  try { return new Date(s).toLocaleString(); } catch { return s; } 
+}
+
+// Toolbar
+$('search').addEventListener('input', renderTable);
+$('filterStatus').addEventListener('change', renderTable);
+$('filterCat').addEventListener('change', renderTable);
+$('refreshBtn').addEventListener('click', loadPlayers);
+$('printBtn').addEventListener('click', () => window.print());
+$('csvBtn').addEventListener('click', () => window.open('/api/admin/export.csv', '_blank'));
+
+// Close Modals on Overlay Click
+$('settingsModal').addEventListener('click', e => { if (e.target === $('settingsModal')) closeSettings(); });
+$('editModal').addEventListener('click', e => { if (e.target === $('editModal')) closeEdit(); });
+
+// Close Modals on Escape Key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeSettings();
+    closeEdit();
+  }
+});
+
+let toastTimer;
+function toast(msg) {
+  const t = $('toast'); 
+  t.textContent = msg; 
+  t.classList.add('show');
+  clearTimeout(toastTimer); 
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// Initialize
+boot();
+</script>
+</body>
+</html>
