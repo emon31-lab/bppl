@@ -12,14 +12,14 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
-const multer = require('multer');
 const cors = require('cors');
+const { Resend } = require('resend'); // Resend ইমপোর্ট করা হলো
 
 const config = require('./config');
 const { Player, Admin, VerifyRequest, Setting, connect } = require('./db');
 
-// Multer (শুধু FormData পার্স করার জন্য, ছবি নেই)
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+// Resend Initialization
+const resend = config.resendApiKey ? new Resend(config.resendApiKey) : null;
 
 const app = express();
 app.set('trust proxy', 1);
@@ -47,7 +47,7 @@ const verifyLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5 });
 const submitLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
-// ---- Email ----
+// ---- Email Setup ----
 const hasSmtp = !!(config.smtp.host && config.smtp.auth.user && config.smtp.auth.pass);
 const transporter = hasSmtp ? nodemailer.createTransport(config.smtp) : null;
 
@@ -57,15 +57,37 @@ function esc(s) {
   }[c]));
 }
 
+// ==========================================
+// আপডেটেড sendMail (Resend + SMTP Fallback)
+// ==========================================
 async function sendMail(to, subject, html, text) {
-  if (!hasSmtp) {
-    console.log('\n=== EMAIL ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
-    return;
+  // ১. প্রথমে Resend দিয়ে চেষ্টা করবে
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from: 'Bepari Para Premier League <onboarding@resend.dev>', 
+        to: to,
+        subject: subject,
+        html: html
+      });
+      console.log(`✔ Email sent via Resend to ${to}`);
+      return;
+    } catch (e) {
+      console.error('❌ Resend failed:', e.message);
+      // Resend ফেইল করলে নিচের SMTP দিয়ে ফলব্যাক করবে
+    }
   }
-  try {
-    await transporter.sendMail({ from: config.fromEmail, to, subject, html, text });
-  } catch (e) {
-    console.error('Email send failed to', to, ':', e.message);
+
+  // ২. Resend না থাকলে বা ফেইল করলে Gmail SMTP ব্যবহার করবে
+  if (hasSmtp && transporter) {
+    try {
+      await transporter.sendMail({ from: config.fromEmail, to, subject, html, text });
+      console.log(`✔ Email sent via SMTP to ${to}`);
+    } catch (e) {
+      console.error('❌ SMTP failed to', to, ':', e.message);
+    }
+  } else {
+    console.log('\n=== EMAIL (NO PROVIDER) ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
   }
 }
 
@@ -128,8 +150,6 @@ app.use(async (req, res, next) => {
 app.get('/api/config', async (req, res) => {
   try {
     let settings = await Setting.findOne({ key: 'global' });
-    
-    // যদি ডাটাবেসে আগে থেকে সেভ করা না থাকে, তবে .env থেকে নিয়ে সেভ করে নিবে
     if (!settings) {
       settings = await Setting.create({
         key: 'global',
@@ -159,6 +179,7 @@ app.get('/api/health', async (req, res) => {
 
 // ============ REGISTRATION ============
 
+// ⚡ NON-BLOCKING EMAIL APPLIED HERE
 app.post('/api/register/request-verification', verifyLimiter, async (req, res) => {
   try {
     const { whatsapp, email } = req.body || {};
@@ -178,7 +199,11 @@ app.post('/api/register/request-verification', verifyLimiter, async (req, res) =
     await VerifyRequest.create({ email: normalizedEmail, whatsapp: fullPhone, token, expiresAt });
 
     const link = config.baseUrl + '/verify-email?token=' + token;
-    await sendVerificationEmail(normalizedEmail, link);
+    
+    // 🚀 await সরিয়ে দেওয়া হলো, ইমেইল ব্যাকগ্রাউন্ডে যাবে, সার্ভার আটকে থাকবে না
+    sendVerificationEmail(normalizedEmail, link).catch(e => console.error('Email error:', e.message));
+    
+    // ইউজার সাথে সাথে রেসপন্স পাবে
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ ok: false, error: 'Server error' }); }
 });
@@ -190,6 +215,7 @@ app.get('/verify-email', async (req, res) => {
     const row = await VerifyRequest.findOne({ token, used: false });
     if (!row || row.expiresAt < new Date()) return res.status(400).send('Invalid or expired link.');
     row.used = true; await row.save();
+    
     const sessionToken = jwt.sign({ email: row.email, whatsapp: row.whatsapp, type: 'verify' }, config.jwtSecret, { expiresIn: '30m' });
     res.cookie('verify_session', sessionToken, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 60 * 1000, secure: config.baseUrl.startsWith('https') });
     res.redirect('/fillup?verified=1');
@@ -206,8 +232,7 @@ app.get('/api/register/session', (req, res) => {
   } catch { res.json({ ok: true, verified: false }); }
 });
 
-// ---- Submit without photo ----
-app.post('/api/register/submit', submitLimiter, upload.single('photo'), async (req, res) => {
+app.post('/api/register/submit', submitLimiter, async (req, res) => {
   try {
     const token = req.cookies.verify_session;
     if (!token) return res.status(401).json({ ok: false, error: 'Verify email first.' });
@@ -236,8 +261,10 @@ app.post('/api/register/submit', submitLimiter, upload.single('photo'), async (r
       status: 'pending', emailVerified: true
     });
 
+    // এখানেও Non-blocking করা হলো
     sendAdminNewPlayer(player).catch(() => {});
     sendUserSubmitted(player).catch(() => {});
+    
     res.clearCookie('verify_session');
     res.json({ ok: true, id: player._id });
   } catch (e) { res.status(500).json({ ok: false, error: 'Server error' }); }
@@ -271,7 +298,6 @@ app.get('/api/admin/me', requireAdmin, (req, res) => {
   res.json({ ok: true, username: req.admin.username, tournamentName: config.tournamentName });
 });
 
-// ---- Admin Settings API ----
 app.get('/api/admin/settings', requireAdmin, async (req, res) => {
   try {
     let settings = await Setting.findOne({ key: 'global' });
@@ -300,7 +326,6 @@ app.post('/api/admin/settings', requireAdmin, async (req, res) => {
     res.json({ ok: true, settings });
   } catch (e) { res.status(500).json({ ok: false, error: 'Server error' }); }
 });
-// -------------------------
 
 app.get('/api/admin/players', requireAdmin, async (req, res) => {
   try {
@@ -329,7 +354,7 @@ app.patch('/api/admin/players/:id', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ ok: false, error: 'Server error' }); }
 });
 
-app.patch('/api/admin/players/:id/edit', requireAdmin, upload.single('photo'), async (req, res) => {
+app.patch('/api/admin/players/:id/edit', requireAdmin, async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
     if (!player) return res.status(404).json({ ok: false, error: 'Player not found' });
@@ -394,7 +419,8 @@ if (require.main === module) {
       console.log('\n  ' + config.tournamentName);
       console.log('  Home  : http://localhost:' + config.port);
       console.log('  Admin : http://localhost:' + config.port + '/admin');
-      console.log('  SMTP: ' + (hasSmtp ? '✓ configured' : '✗ not configured') + '\n');
+      console.log('  Email : ' + (resend ? '✓ Resend' : (hasSmtp ? '✓ SMTP' : '✗ Not configured')));
+      console.log('');
     });
   }).catch(err => { console.error('Failed to start:', err.message); process.exit(1); });
 }
