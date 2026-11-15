@@ -227,7 +227,7 @@ opacity:0;pointer-events:none;transition:all .3s var(--ease);max-width:90vw;text
   </div>
 </section>
 
-<!-- STEP 2: details (Photo section removed) -->
+<!-- STEP 2: details (No Photo) -->
 <section class="screen" data-step="2">
   <div class="screen-head">
     <span class="eyebrow">Step 2</span>
@@ -512,7 +512,6 @@ let positionWheel, sizeWheel, numberWheel;
 let state = {
   step: 1, whatsapp:'', email:'', name:'', fatherName:'', address:'',
   position:'', size:'', number:'10', bkashNumber:'', bkashTrxid:'', referrerName:''
-  // photoFile রিমুভ করা হয়েছে
 };
 let pollTimer = null;
 
@@ -539,8 +538,6 @@ async function init() {
 
   ['fWhatsapp','fEmail','fName','fFather','fAddress','fBkashNum','fTrxid','fReferrer']
     .forEach(id => { const el = $(id); if (el) el.addEventListener('input', onInput); });
-
-  // Photo 관련 이벤트 리스너 제거됨
 
   $('copyBkash').addEventListener('click', copyBkash);
   $('ctaBtn').addEventListener('click', onCTA);
@@ -589,7 +586,6 @@ function validateStep1() {
 }
 function validateStep2() {
   const errs = {};
-  // if (!state.photoFile) errs.photo = 'Upload your photo'; <-- এই লাইনটি বাদ দেওয়া হয়েছে
   if (!state.name.trim() || state.name.trim().length < 3) errs.name = 'Enter your full name';
   if (!state.fatherName.trim()) errs.fatherName = "Enter father's name";
   if (!state.address.trim()) errs.address = 'Enter your address';
@@ -608,7 +604,7 @@ function validateStep3() {
 function showErrors(errs) {
   const map = { whatsapp:'errWhatsapp', email:'errEmail', name:'errName', fatherName:'errFather',
     address:'errAddress', bkashNumber:'errBkashNum', bkashTrxid:'errTrxid',
-    referrerName:'errReferrer' }; // photo:'errPhoto' বাদ দেওয়া হয়েছে
+    referrerName:'errReferrer' };
   const inpMap = { whatsapp:'fWhatsapp', email:'fEmail', name:'fName', fatherName:'fFather',
     address:'fAddress', bkashNumber:'fBkashNum', bkashTrxid:'fTrxid', referrerName:'fReferrer' };
   Object.keys(errs).forEach(k => {
@@ -663,17 +659,23 @@ async function onCTA() {
     const errs = validateStep1();
     if (Object.keys(errs).length) { showErrors(errs); return; }
     submitting = true; btn.classList.add('loading'); btn.disabled = true;
+    
+    // Faster UX feedback
+    const originalText = btn.querySelector('.btn-text').textContent;
+    btn.querySelector('.btn-text').textContent = 'Sending Email...';
+    
     try {
       const r = await fetch('/api/register/request-verification', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ whatsapp: state.whatsapp, email: state.email })
       });
       const d = await r.json();
-      if (!r.ok) { toast(d.error || 'Failed'); btn.disabled = false; return; }
+      if (!r.ok) { toast(d.error || 'Failed'); btn.disabled = false; btn.querySelector('.btn-text').textContent = originalText; return; }
+      
       $('sentEmail').textContent = state.email;
       $('verifyForm').style.display = 'none'; $('verifySent').style.display = 'block'; btn.style.display = 'none';
       startPolling();
-    } catch { toast('Network error'); btn.disabled = false; }
+    } catch { toast('Network error'); btn.disabled = false; btn.querySelector('.btn-text').textContent = originalText; }
     finally { submitting = false; btn.classList.remove('loading'); }
 
   } else if (state.step === 2) {
@@ -697,7 +699,6 @@ async function onCTA() {
       fd.append('bkashNumber', state.bkashNumber);
       fd.append('bkashTrxid', state.bkashTrxid);
       fd.append('referrerName', state.referrerName);
-      // fd.append('photo', state.photoFile); <-- এই লাইনটি বাদ দেওয়া হয়েছে
 
       const r = await fetch('/api/register/submit', { method:'POST', body: fd });
       const d = await r.json();
