@@ -14,6 +14,9 @@ module.exports = {
 
   mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bepari_para',
 
+  // Resend API Key (Render এ সেট করা)
+  resendApiKey: process.env.RESEND_API_KEY || '',
+
   bkash: {
     number: process.env.BKASH_NUMBER || '01700000000',
     amount: parseInt(process.env.BKASH_AMOUNT || '200', 10)
@@ -25,6 +28,7 @@ module.exports = {
   sizes: ['S', 'M', 'L', 'XL', 'XXL'],
   categories: ['', 'A', 'B', 'C', 'Star', 'Regular', 'Beginner'],
 
+  // SMTP Fallback (যদি Resend ফেইল করে)
   smtp: {
     host: process.env.SMTP_HOST || '',
     port: parseInt(process.env.SMTP_PORT || '587', 10),
