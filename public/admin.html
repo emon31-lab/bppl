@@ -203,7 +203,7 @@ opacity:0;pointer-events:none;transition:all 0.3s ease;box-shadow:0 10px 30px rg
       <input type="text" id="u" autocomplete="username" required>
       <label for="p">Password</label>
       <input type="password" id="p" autocomplete="current-password" required>
-      <button type="submit">Sign in</button>
+      <button type="submit" id="loginBtn">Sign in</button>
     </form>
     <a href="/" class="login-back">← Back to home</a>
   </div>
@@ -393,6 +393,7 @@ let CATEGORIES = [];
 let POSITIONS = [];
 let SIZES = [];
 let TOURNAMENT = 'Bepari Para Premier League';
+let isBooting = false;
 
 // ================= API HELPER =================
 async function api(url, opts) {
@@ -404,8 +405,9 @@ async function api(url, opts) {
     }, opts));
     const data = await res.json().catch(() => ({}));
     
-    // Session Expired Handler
-    if (res.status === 401 && !url.includes('login')) {
+    // 🔥 FIX: Infinite Reload Loop Fix
+    // /api/admin/me বা login URL-এ 401 আসলে রিলোড হবে না।
+    if (res.status === 401 && !url.includes('login') && !url.includes('/me')) {
       toast('Session expired. Please login again.');
       setTimeout(() => location.reload(), 1500);
       return { res, data };
@@ -423,8 +425,9 @@ $('loginForm').addEventListener('submit', async e => {
   const err = $('loginErr'); 
   err.classList.remove('show');
   
-  const btn = e.target.querySelector('button');
-  btn.disabled = true; btn.textContent = 'Signing in...';
+  const btn = $('loginBtn');
+  btn.disabled = true; 
+  btn.textContent = 'Signing in...';
 
   const r = await api('/api/admin/login', {
     method: 'POST', 
@@ -434,7 +437,8 @@ $('loginForm').addEventListener('submit', async e => {
   if (!r.res.ok) { 
     err.textContent = r.data.error || 'Login failed'; 
     err.classList.add('show'); 
-    btn.disabled = false; btn.textContent = 'Sign in';
+    btn.disabled = false; 
+    btn.textContent = 'Sign in';
     return; 
   }
   boot();
@@ -447,16 +451,22 @@ $('logoutBtn').addEventListener('click', async () => {
 
 // ================= BOOT =================
 async function boot() {
-  const [meRes, cfgRes] = await Promise.all([
-    api('/api/admin/me'),
-    fetch('/api/config').then(r => r.json()).catch(() => ({}))
-  ]);
+  if (isBooting) return;
+  isBooting = true;
+
+  // 1. Check if logged in
+  const meRes = await api('/api/admin/me');
   
   if (!meRes.res.ok) { 
+    // Not logged in — show login screen
     $('loginWrap').style.display = 'grid'; 
     $('dash').classList.remove('active'); 
+    isBooting = false;
     return; 
   }
+  
+  // 2. Logged in — load config and show dashboard
+  const cfgRes = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
   
   TOURNAMENT = meRes.data.tournamentName || TOURNAMENT;
   $('tournName').textContent = TOURNAMENT;
@@ -469,12 +479,13 @@ async function boot() {
   $('dash').classList.add('active');
   
   await loadPlayers();
+  isBooting = false;
 }
 
 // ================= LOAD DATA =================
 async function loadPlayers() {
   const r = await api('/api/admin/players');
-  if (!r.res.ok) return; // 401 handled in api()
+  if (!r.res.ok) return;
   
   ALL = r.data.players || [];
   CATEGORIES = r.data.categories || [];
@@ -578,7 +589,7 @@ function renderTable() {
         toast('Category updated');
       } else {
         toast('Update failed');
-        renderTable(); // revert UI
+        renderTable(); 
       }
     });
   });
