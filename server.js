@@ -11,12 +11,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const multer = require('multer');
+const { mail } = require('postboi'); // Postboi ইমপোর্ট
 
 const config = require('./config');
 const { Player, Admin, VerifyRequest, Setting, connect } = require('./db');
+
+// Postboi Token সেট করা (এটি process.env থেকেও অটোমেটিক নিতে পারে, তবে নিশ্চিত করার জন্য)
+if (config.postboiToken) {
+  process.env.POSTBOI_TOKEN = config.postboiToken;
+}
 
 // Multer (শুধু FormData পার্স করার জন্য)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -47,41 +52,31 @@ const verifyLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5 });
 const submitLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
-// ---- Email Setup (Brevo SMTP) ----
-const hasSmtp = !!(config.smtp.host && config.smtp.auth.user && config.smtp.auth.pass);
-const transporter = hasSmtp ? nodemailer.createTransport({
-  host: config.smtp.host, // smtp-relay.brevo.com
-  port: config.smtp.port, // 587
-  secure: config.smtp.secure, // false
-  auth: {
-    user: config.smtp.auth.user, // আপনার Brevo ইমেইল
-    pass: config.smtp.auth.pass  // Brevo SMTP Key
-  }
-}) : null;
-
 function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 }
 
+// ==========================================
+// Postboi Email Sender Function
+// ==========================================
 async function sendMail(to, subject, html, text) {
-  if (!hasSmtp || !transporter) {
-    console.log('\n=== EMAIL (NO PROVIDER) ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
+  if (!config.postboiToken) {
+    console.log('\n=== EMAIL (NO POSTBOI TOKEN) ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
     return;
   }
 
   try {
-    await transporter.sendMail({
-      from: config.fromEmail, 
+    await mail({
       to: to,
       subject: subject,
-      html: html,
+      body: html, // Postboi-তে HTML কন্টেন্ট 'body' হিসেবে পাঠাতে হয়
       text: text
     });
-    console.log(`✔ Email sent via Brevo to ${to}`);
+    console.log(`✔ Email sent via Postboi to ${to}`);
   } catch (e) {
-    console.error('❌ Brevo Email failed to', to, ':', e.message);
+    console.error('❌ Postboi Email failed to', to, ':', e.message);
   }
 }
 
@@ -196,7 +191,6 @@ app.post('/api/register/request-verification', verifyLimiter, async (req, res) =
     // 🚀 await সরিয়ে দেওয়া হলো, ইমেইল ব্যাকগ্রাউন্ডে যাবে, সার্ভার আটকে থাকবে না
     sendVerificationEmail(normalizedEmail, link).catch(e => console.error('Email error:', e.message));
     
-    // ইউজার সাথে সাথে রেসপন্স পাবে
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ ok: false, error: 'Server error' }); }
 });
@@ -412,7 +406,7 @@ if (require.main === module) {
       console.log('\n  ' + config.tournamentName);
       console.log('  Home  : http://localhost:' + config.port);
       console.log('  Admin : http://localhost:' + config.port + '/admin');
-      console.log('  Email : ' + (hasSmtp ? '✓ SMTP (Brevo)' : '✗ Not configured'));
+      console.log('  Email : ' + (config.postboiToken ? '✓ Postboi' : '✗ Not configured'));
       console.log('');
     });
   }).catch(err => { console.error('Failed to start:', err.message); process.exit(1); });
