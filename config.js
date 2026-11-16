@@ -14,9 +14,6 @@ module.exports = {
 
   mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bepari_para',
 
-  // Resend API Key (Render এ সেট করা)
-  resendApiKey: process.env.RESEND_API_KEY || '',
-
   bkash: {
     number: process.env.BKASH_NUMBER || '01700000000',
     amount: parseInt(process.env.BKASH_AMOUNT || '200', 10)
@@ -28,9 +25,9 @@ module.exports = {
   sizes: ['S', 'M', 'L', 'XL', 'XXL'],
   categories: ['', 'A', 'B', 'C', 'Star', 'Regular', 'Beginner'],
 
-  // SMTP Fallback (যদি Resend ফেইল করে)
+  // Brevo SMTP Setup
   smtp: {
-    host: process.env.SMTP_HOST || '',
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     secure: process.env.SMTP_SECURE === 'true',
     auth: {
@@ -38,5 +35,5 @@ module.exports = {
       pass: process.env.SMTP_PASS || ''
     }
   },
-  fromEmail: process.env.FROM_EMAIL || 'no-reply@example.com'
+  fromEmail: process.env.FROM_EMAIL || 'Bepari Para Premier League <no-reply@example.com>'
 };
