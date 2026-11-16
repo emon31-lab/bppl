@@ -13,13 +13,13 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const { Resend } = require('resend'); // Resend ইমপোর্ট করা হলো
+const multer = require('multer');
 
 const config = require('./config');
 const { Player, Admin, VerifyRequest, Setting, connect } = require('./db');
 
-// Resend Initialization
-const resend = config.resendApiKey ? new Resend(config.resendApiKey) : null;
+// Multer (শুধু FormData পার্স করার জন্য)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const app = express();
 app.set('trust proxy', 1);
@@ -47,9 +47,17 @@ const verifyLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5 });
 const submitLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
-// ---- Email Setup ----
+// ---- Email Setup (Brevo SMTP) ----
 const hasSmtp = !!(config.smtp.host && config.smtp.auth.user && config.smtp.auth.pass);
-const transporter = hasSmtp ? nodemailer.createTransport(config.smtp) : null;
+const transporter = hasSmtp ? nodemailer.createTransport({
+  host: config.smtp.host, // smtp-relay.brevo.com
+  port: config.smtp.port, // 587
+  secure: config.smtp.secure, // false
+  auth: {
+    user: config.smtp.auth.user, // আপনার Brevo ইমেইল
+    pass: config.smtp.auth.pass  // Brevo SMTP Key
+  }
+}) : null;
 
 function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
@@ -57,37 +65,23 @@ function esc(s) {
   }[c]));
 }
 
-// ==========================================
-// আপডেটেড sendMail (Resend + SMTP Fallback)
-// ==========================================
 async function sendMail(to, subject, html, text) {
-  // ১. প্রথমে Resend দিয়ে চেষ্টা করবে
-  if (resend) {
-    try {
-      await resend.emails.send({
-        from: 'Bepari Para Premier League <onboarding@resend.dev>', 
-        to: to,
-        subject: subject,
-        html: html
-      });
-      console.log(`✔ Email sent via Resend to ${to}`);
-      return;
-    } catch (e) {
-      console.error('❌ Resend failed:', e.message);
-      // Resend ফেইল করলে নিচের SMTP দিয়ে ফলব্যাক করবে
-    }
+  if (!hasSmtp || !transporter) {
+    console.log('\n=== EMAIL (NO PROVIDER) ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
+    return;
   }
 
-  // ২. Resend না থাকলে বা ফেইল করলে Gmail SMTP ব্যবহার করবে
-  if (hasSmtp && transporter) {
-    try {
-      await transporter.sendMail({ from: config.fromEmail, to, subject, html, text });
-      console.log(`✔ Email sent via SMTP to ${to}`);
-    } catch (e) {
-      console.error('❌ SMTP failed to', to, ':', e.message);
-    }
-  } else {
-    console.log('\n=== EMAIL (NO PROVIDER) ===\nTo:', to, '\nSubject:', subject, '\nText:', text || '(html only)', '\n=============\n');
+  try {
+    await transporter.sendMail({
+      from: config.fromEmail, 
+      to: to,
+      subject: subject,
+      html: html,
+      text: text
+    });
+    console.log(`✔ Email sent via Brevo to ${to}`);
+  } catch (e) {
+    console.error('❌ Brevo Email failed to', to, ':', e.message);
   }
 }
 
@@ -179,7 +173,6 @@ app.get('/api/health', async (req, res) => {
 
 // ============ REGISTRATION ============
 
-// ⚡ NON-BLOCKING EMAIL APPLIED HERE
 app.post('/api/register/request-verification', verifyLimiter, async (req, res) => {
   try {
     const { whatsapp, email } = req.body || {};
@@ -261,7 +254,7 @@ app.post('/api/register/submit', submitLimiter, async (req, res) => {
       status: 'pending', emailVerified: true
     });
 
-    // এখানেও Non-blocking করা হলো
+    // Non-blocking emails
     sendAdminNewPlayer(player).catch(() => {});
     sendUserSubmitted(player).catch(() => {});
     
@@ -419,7 +412,7 @@ if (require.main === module) {
       console.log('\n  ' + config.tournamentName);
       console.log('  Home  : http://localhost:' + config.port);
       console.log('  Admin : http://localhost:' + config.port + '/admin');
-      console.log('  Email : ' + (resend ? '✓ Resend' : (hasSmtp ? '✓ SMTP' : '✗ Not configured')));
+      console.log('  Email : ' + (hasSmtp ? '✓ SMTP (Brevo)' : '✗ Not configured'));
       console.log('');
     });
   }).catch(err => { console.error('Failed to start:', err.message); process.exit(1); });
